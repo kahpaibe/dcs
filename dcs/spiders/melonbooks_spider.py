@@ -66,7 +66,10 @@ class MelonbookSpider(scrapy.Spider):
     
     @staticmethod
     def _get_product_url(response: scrapy.http.TextResponse, item_url: str) -> None:
-        return response.urljoin(item_url)
+        product_url = response.urljoin(item_url)
+        if "&adult_view=1" not in product_url:
+            product_url += "&adult_view=1" # bypass R18 check
+        return product_url
     
     def parse_products(self, response: scrapy.http.TextResponse):
         """Parse product pages for metatada"""
