@@ -32,7 +32,6 @@ def configure_loggers(): # Called when starting the spider, configure the logger
 # root url list definition
 #   Here, define the first pages to parse, from which new pages can be accessed. For example, a search pages for all M3-XX events.
 # ===================================================================
-# === M3 urls ===
 melonbooks_urls: list[str] = []
 melonbooks_urls.append("https://www.melonbooks.co.jp/search/search.php?mode=search&search_disp=&chara=&orderby=&disp_number=100&pageno=1&is_sp_view=0&name=&text_type=all&name=&fromagee_flg=2&search_target_all=0&additional_all=1&category_ids%5B%5D=2&child_category_ids%5B%5D=30&category_ids%5B%5D=170&product_type=all&is_end_of_sale%5B%5D=1&is_end_of_sale2=1&sale_date_before=&sale_date_after=&publication_date_before=&publication_date_after=&co_name=&ci_name=&price_low=0&price_high=0")
 
