@@ -28,8 +28,9 @@ REDIRECT_ENABLED = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "dcs.pipelines.MelonbooksItemImagePipeline": 1,
-    "dcs.pipelines.TanocstoreItemImagePipeline": 1,
+    "dcs.pipelines.MelonbooksImagePipeline": 1,
+    "dcs.pipelines.TanocstoreImagePipeline": 1,
+    "dcs.pipelines.DiversedirectImagePipeline": 1,
                   }
 # IMAGES_STORE =  # Will be overriden anyway
 

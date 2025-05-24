@@ -11,7 +11,7 @@ from .common import file_path_substitution
 # ===================================================================
 # User settings
 # ===================================================================
-RESOURCES_FOLDER_PATH = Path(__file__).parent.parent / "Resources" / "TanocstoreSpider"
+RESOURCES_FOLDER_PATH = Path(__file__).parent.parent / "Resources" / "DiversedirectSpider"
 LOG_SEARCH_PATH = RESOURCES_FOLDER_PATH / "parsed_search_pages.log" # Here will be logged all search pages parsed
 LOG_ITEMS_PATH = RESOURCES_FOLDER_PATH / "parsed_item_pages.log" # Here will be logged all item pages parsed
 LOG_IMAGES_PATH = RESOURCES_FOLDER_PATH / "parsed_images.log" # Here will be logged all images the program tried to download
@@ -32,25 +32,25 @@ def configure_loggers(): # Called when starting the spider, configure the logger
 # root url list definition
 #   Here, define the first pages to parse, from which new pages can be accessed. For example, a search pages for all M3-XX events.
 # ===================================================================
-tanocstore_urls: list[str] = []
-tanocstore_urls.append("https://www.tanocstore.net/shopbrand/all_items/") # Just scrape everything
+diversedirect_urls: list[str] = []
+diversedirect_urls.append("https://www.diverse.direct/") # We'll first get every circles from the main page
 
 # ======================================================================
 # Utilities
 # ======================================================================
-RE_ITEM_ID_FROM_IMAGE_URL = re.compile(r'/([^/]+)\.jpg')
-def get_item_id_from_image_url(url: str) -> str:
-    """Retrieve item id from given url"""
+RE_ITEM_ID_FROM_IMAGE_URL = re.compile(r'/([^/]+)\.([^/]+)$')
+def get_image_raw_name_from_url(url: str) -> str:
+    """Retrieve raw image name from given url"""
     match = RE_ITEM_ID_FROM_IMAGE_URL.search(url)
     if match:
-        return match.group(1)
+        return match.group(1), match.group(2) # (name, ext)
     else:
-        logging.warning(f"Warning! Could not find id in {url} !")
+        logging.warning(f"Warning! Could not find image name in {url} !")
 
-def get_id_and_image_file_name_from_url(url: str) -> tuple[str, str]:
-    """Compute image name from url and return [id, file_name]"""
-    item_id = get_item_id_from_image_url(url)
-    return (item_id, file_path_substitution(f"{item_id}_{hashlib.sha1(to_bytes(url)).hexdigest()}.jpg"))
+def get_image_file_name_from_url(url: str) -> tuple[str, str]:
+    """Compute image name from url and return file_name"""
+    raw_name, ext = get_image_raw_name_from_url(url)
+    return file_path_substitution(f"{raw_name}_{hashlib.sha1(to_bytes(url)).hexdigest()}.{ext}")
 
 
 # ======================================================================
