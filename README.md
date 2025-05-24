@@ -2,7 +2,7 @@
 
 Crappy scrapy crawler to scrape some websites.
 
-# Requirements and usage
+## Requirements and usage
 **Requirements**
 
 * [python 3.10+](https://www.python.org/)
@@ -10,18 +10,25 @@ Crappy scrapy crawler to scrape some websites.
 
 **Usage**
 
-When in root directory of the scrapy project (where `scrapy.cfg` is, run `scrapy crawl melonbooks`) and let it do its thing.
+When in root directory of the scrapy project (where `scrapy.cfg` is), run `scrapy crawl {spider_name}` and let it do its thing. For example, `scrapy crawl melonbooks`. See below for the list of available spiders.
 
 All saved content are done in the `Resources` folder. To do a clean run again, just delete the `Resources` folder.
 
 **Config**
 
-Many configs relevant to the program are available in the `./spiders/melonbooks_spider.py` file, or in `./settings.py` for scrapy-specific settings.
+Many configs relevant to the program are available in the `./spiders/{spider_name}_spider.py` files, or in `./settings.py` for scrapy-specific settings. See below for the list of available spiders.
 
-# Notes
+## Spider list
+| Name | Description | Status | Todo |
+| ---- | ----------- | ------ | ---- |
+| melonbooks | Scrape [Melonbooks](https://www.melonbooks.co.jp/) | html dump | Extract item info to a db |
+| tanocstore | Scrape [TANO*C STORE](https://www.tanocstore.net/) | html dump | Extract item info to a db, filter for albums only |
+
+
+## Notes
 
 The code is rather messy, as this was put together fairly quickly for a very generic purpose.
 
-# TODO
+## TODO
 
 Make the code not bad.

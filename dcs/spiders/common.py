@@ -14,4 +14,9 @@ def file_path_substitution(path: str) -> str:
     str_path = str_path.replace("<", "＜")
     str_path = str_path.replace(">", "＞")
     str_path = str_path.replace("|", "｜")
+    str_path = str_path.replace("?", "？")
     return str_path
+
+def strip_list(str_list: list[str], chars: str = "\r\n\t 　") -> list[str]:
+    """Returns a copy of given list with all items stripped of given characters."""
+    return [a.strip(chars) for a in str_list]

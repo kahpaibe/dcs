@@ -5,8 +5,7 @@
 #
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-from .spiders.melonbooks_spider import ITEM_IMAGE_FOLDER_PATH # store image/item folder
+#     https://docs.scrapy.org/en/latest/topics/spider-middleware.html*
 from pathlib import Path
 import logging
 
@@ -28,7 +27,11 @@ REDIRECT_ENABLED = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {"dcs.pipelines.MelonbooksItemImagePipeline": 1}
+ITEM_PIPELINES = {
+    "dcs.pipelines.MelonbooksItemImagePipeline": 1,
+    "dcs.pipelines.TanocstoreItemImagePipeline": 1,
+                  }
+# IMAGES_STORE =  # Will be overriden anyway
 
 # Configure logger
 LOG_ENABLED = True

@@ -11,7 +11,7 @@ from .common import file_path_substitution
 # ===================================================================
 # User settings
 # ===================================================================
-RESOURCES_FOLDER_PATH = Path(__file__).parent.parent / "Resources" / "MelonbooksSpider"
+RESOURCES_FOLDER_PATH = Path(__file__).parent.parent / "Resources" / "TanocstoreSpider"
 LOG_SEARCH_PATH = RESOURCES_FOLDER_PATH / "parsed_search_pages.log" # Here will be logged all search pages parsed
 LOG_ITEMS_PATH = RESOURCES_FOLDER_PATH / "parsed_item_pages.log" # Here will be logged all item pages parsed
 LOG_IMAGES_PATH = RESOURCES_FOLDER_PATH / "parsed_images.log" # Here will be logged all images the program tried to download
@@ -33,13 +33,13 @@ def configure_loggers(): # Called when starting the spider, configure the logger
 #   Here, define the first pages to parse, from which new pages can be accessed. For example, a search pages for all M3-XX events.
 # ===================================================================
 # === M3 urls ===
-melonbooks_urls: list[str] = []
-melonbooks_urls.append("https://www.melonbooks.co.jp/search/search.php?mode=search&search_disp=&chara=&orderby=&disp_number=100&pageno=1&is_sp_view=0&name=&text_type=all&name=&fromagee_flg=2&search_target_all=0&additional_all=1&category_ids%5B%5D=2&child_category_ids%5B%5D=30&category_ids%5B%5D=170&product_type=all&is_end_of_sale%5B%5D=1&is_end_of_sale2=1&sale_date_before=&sale_date_after=&publication_date_before=&publication_date_after=&co_name=&ci_name=&price_low=0&price_high=0")
+tanocstore_urls: list[str] = []
+tanocstore_urls.append("https://www.tanocstore.net/shopbrand/all_items/") # Just scrape everything
 
 # ======================================================================
 # Utilities
 # ======================================================================
-RE_ITEM_ID_FROM_IMAGE_URL = re.compile(r'\?image=([^\.]+)\.jpg')
+RE_ITEM_ID_FROM_IMAGE_URL = re.compile(r'/([^/]+)\.jpg')
 def get_item_id_from_image_url(url: str) -> str:
     """Retrieve item id from given url"""
     match = RE_ITEM_ID_FROM_IMAGE_URL.search(url)
