@@ -1,6 +1,7 @@
 """
 Defines a few useful things and the settings made for this scraping project.
 """
+
 import re
 import hashlib
 import logging

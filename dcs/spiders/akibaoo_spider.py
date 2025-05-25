@@ -1,4 +1,6 @@
-from pathlib import Path
+"""
+Akibaoo a spider for tanocstore.
+"""
 
 import scrapy
 import scrapy.http

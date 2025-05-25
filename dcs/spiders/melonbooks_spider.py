@@ -1,4 +1,6 @@
-from pathlib import Path
+"""
+Defines a spider for Melonbooks.
+"""
 
 import scrapy
 import scrapy.http
@@ -7,8 +9,6 @@ import scrapy.responsetypes
 from .melonbooks_settings import LOG_SEARCH_PATH, LOG_ITEMS_PATH, ITEM_HTML_FOLDER_PATH, melonbooks_urls, get_id_and_image_file_name_from_url, file_path_substitution, configure_loggers
 
 import re
-import json
-import logging
 
 # ===================================================================
 # Spider definition

@@ -1,4 +1,6 @@
-from pathlib import Path
+"""
+Defines a spider for tanocstore.
+"""
 
 import scrapy
 import scrapy.http

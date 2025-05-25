@@ -1,4 +1,6 @@
-from pathlib import Path
+"""
+Defines a spider for Diverse.Direct.
+"""
 
 import scrapy
 import scrapy.http
