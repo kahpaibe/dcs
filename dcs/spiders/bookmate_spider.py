@@ -60,7 +60,7 @@ class BookmateSpider(scrapy.Spider):
         if not response:
             return
         def parse_product_do(response_: scrapy.http.TextResponse):
-            """Defines the parsing action to be called or not (avoid recursion)."""
+            """Defines the parsing action to be called or not (avoid recursion by avoiding yielding a new Request object if not needed)."""
             
             # === Retrieve image urls ===
             image_urls_ = self._get_image_urls(response_)
@@ -84,7 +84,7 @@ class BookmateSpider(scrapy.Spider):
             logger = logging.getLogger("scrapy.core.scraper")
             logger.info(f"R18 page detected ! Trying response... ({response.url})")
             with open(LOG_ITEMS_PATH, "a+", encoding="utf-8") as f:
-                f.write(f"R18 page detected ! Trying response... ({response.url})")
+                f.write(f"R18 page detected ! Trying response... ({response.url})\n")
 
             yield scrapy.FormRequest.from_response(
                 response,
