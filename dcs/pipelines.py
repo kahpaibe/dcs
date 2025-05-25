@@ -16,6 +16,7 @@ from typing import Callable
 from .spiders import melonbooks_settings as sms
 from .spiders import tanocstore_settings as sts
 from .spiders import diversedirect_settings as sdds
+from .spiders import bookmate_settings as sbs
 
 class MelonbooksImagePipeline(ImagesPipeline):
     counter = 0
@@ -108,6 +109,37 @@ class DiversedirectImagePipeline(ImagesPipeline):
         file_name = sdds.get_image_file_name_from_url(request.url)
         self.counter += 1
         with open(sdds.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
+            f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
+
+        return file_name
+    
+class BookmateImagePipeline(ImagesPipeline):
+    counter = 0
+    DEFAULT_IMAGES_URLS_FIELD = "bookmate_image_urls"
+    DEFAULT_IMAGES_RESULT_FIELD = "bookmate_images"
+
+    def __init__(
+        self,
+        store_uri: Any,
+        download_func: Callable[[Request, Spider], Response] | None = None,
+        settings: Settings | dict[str, Any] | None = None,
+        *,
+        crawler: Crawler | None = None,
+    ):
+        # Ignore store_uri (=IMAGES_STORE), using custom path instead
+        super().__init__(sbs.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
+            
+    def file_path(
+        self,
+        request: Request,
+        response: Response | None = None,
+        info: MediaPipeline.SpiderInfo | None = None,
+        *,
+        item: Any = None,
+    ) -> str:
+        file_name = sbs.get_image_file_name_from_url(request.url)
+        self.counter += 1
+        with open(sbs.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
             f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
 
         return file_name

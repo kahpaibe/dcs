@@ -31,6 +31,7 @@ ITEM_PIPELINES = {
     "dcs.pipelines.MelonbooksImagePipeline": 1,
     "dcs.pipelines.TanocstoreImagePipeline": 1,
     "dcs.pipelines.DiversedirectImagePipeline": 1,
+    "dcs.pipelines.BookmateImagePipeline": 1,
                   }
 # IMAGES_STORE =  # Will be overriden anyway
 
