@@ -15,6 +15,8 @@ def file_path_substitution(path: str) -> str:
     str_path = str_path.replace(">", "＞")
     str_path = str_path.replace("|", "｜")
     str_path = str_path.replace("?", "？")
+    str_path = str_path.replace("\n", "")
+    str_path = str_path.replace("\r", "")
     return str_path
 
 def strip_list(str_list: list[str], chars: str = "\r\n\t 　") -> list[str]:

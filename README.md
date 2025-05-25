@@ -25,7 +25,7 @@ Many configs relevant to the program are available in the `./spiders/{spider_nam
 | tanocstore | Scrape [TANO*C STORE](https://www.tanocstore.net/) | html dump | Extract item info to a db, filter for albums only |
 | diversedirect | Scrape [Diverse Direct](https://www.diverse.direct/) | html dump | Extract item info to a db, filter for albums only |
 | bookmate | Scrape [Bookmate](https://bookmate-net.com/) | html dump | Extract item info to a db |
-
+| akibaoo | Scrape [Akibaoo](https://www.akibaoo.com/) | html dump | Extract item info to a db, "Auto next page" |
 
 ## Notes
 
