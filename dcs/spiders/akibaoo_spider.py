@@ -37,7 +37,7 @@ class AkibaooSpider(scrapy.Spider):
 
         Yields new requests for:
             * New search pages (next page) -> self.parse_search_for_products(...)
-            * Corresponding item pages -> self.parse_products(...)"""
+            * Corresponding item pages -> self.parse_product(...)"""
         with open(LOG_SEARCH_PATH, "a+", encoding="utf-8") as f: # Log
             self.counter_search+=1
             f.write(f"search ({self.counter_search}): {response.url}\n")
@@ -48,11 +48,11 @@ class AkibaooSpider(scrapy.Spider):
         if item_urls:
             for item_url in item_urls:
                 full_item_url = self._get_product_url(response, item_url)
-                yield scrapy.Request(full_item_url, callback=self.parse_products)
+                yield scrapy.Request(full_item_url, callback=self.parse_product)
         
         # === Crawl for more next search page === -> No easy next page button...
         
-    def parse_products(self, response: scrapy.http.TextResponse):
+    def parse_product(self, response: scrapy.http.TextResponse):
         """Parse product pages for metatada"""
         if not response:
             return

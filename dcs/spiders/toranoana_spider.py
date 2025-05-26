@@ -1,12 +1,12 @@
 """
-Defines a spider for Diverse.Direct.
+Akibaoo a spider for tanocstore.
 """
 
 import scrapy
 import scrapy.http
 import scrapy.http.response
 import scrapy.responsetypes
-from .diversedirect_settings import configure_loggers, LOG_SEARCH_PATH, LOG_ITEMS_PATH, ITEM_HTML_FOLDER_PATH, diversedirect_urls, get_image_file_name_from_url
+from .toranoana_settings import configure_loggers, LOG_SEARCH_PATH, LOG_ITEMS_PATH, ITEM_HTML_FOLDER_PATH, toranoana_urls, get_id_and_image_file_name_from_url
 from .common import file_path_substitution
 
 import re
@@ -15,8 +15,8 @@ import re
 # Spider definition
 # ===================================================================
 # === Spider definition ===
-class DiversedirectSpider(scrapy.Spider):
-    name = "diversedirect"
+class ToranoanaSpider(scrapy.Spider):
+    name = "toranoana"
     counter_items = 0
     counter_search = 0
     
@@ -28,23 +28,11 @@ class DiversedirectSpider(scrapy.Spider):
         super().__init__(*args, **kwargs)
 
     async def start(self):
-        global diversedirect_urls # schedule all root urls
-        for url in diversedirect_urls:
-            yield scrapy.Request(url=url, callback=self.parse_main) # Well here only 1 page (main page)
+        # global toranoana_urls # schedule all root urls
+        # for url in toranoana_urls:
+        #     yield scrapy.Request(url=url, callback=self.parse_search_for_products)
+        yield scrapy.Request("https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=%E9%9F%B3%E6%A5%BDCD&searchBackorderFlg=0&searchUsedItemFlg=1&searchDisplay=0&detailSearch=true&commodity_kind_name=%E5%90%8C%E4%BA%BA%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0&currentPage=147", callback=self.parse_search_for_products)
         
-    def parse_main(self, response: scrapy.http.TextResponse):
-        """Parse main page for searches to do."""
-        # Get all artist pages
-        options = response.xpath('//select[@id="cat"]/option')
-
-        for option in options:
-            # artist = option.xpath('text()').get().strip()
-            cat = option.xpath('@value').get()
-            artist_url = f"https://www.diverse.direct/?cat={cat}"
-            if artist_url.endswith("?cat=-1"):
-                artist_url = "https://www.diverse.direct/category/diverse-system" # Manually redirect to ds's categ
-            yield scrapy.Request(artist_url, callback=self.parse_search_for_products)
-
     def parse_search_for_products(self, response: scrapy.http.TextResponse):
         """Parse search pages.
 
@@ -56,18 +44,18 @@ class DiversedirectSpider(scrapy.Spider):
             f.write(f"search ({self.counter_search}): {response.url}\n")
         
         # === Crawl to product pages ===
-        item_urls = response.xpath('//a[@class="jacket"]/@href').getall()
+        item_urls = response.xpath('//a[@class="product-list-img-inn"]/@href').getall()
 
         if item_urls:
             for item_url in item_urls:
                 full_item_url = self._get_product_url(response, item_url)
                 yield scrapy.Request(full_item_url, callback=self.parse_product)
         
-        # === Crawl for more next search page === -> there is no such page on this website
-
-    @staticmethod
-    def _get_product_url(response: scrapy.http.TextResponse, item_url: str) -> None:
-        return item_url # Nothing to do here
+        # === Crawl for next search page ===
+        next_page_button = response.xpath('//link[@rel="next"]/@href').get() # Check if there is a NEXT button
+        if next_page_button:
+            next_page_url = self._get_next_url(response, next_page_button) # Construct the URL for the next page
+            yield scrapy.Request(next_page_url, callback=self.parse_search_for_products) # Follow the URL for the next page
     
     def parse_product(self, response: scrapy.http.TextResponse):
         """Parse product pages for metatada"""
@@ -78,14 +66,11 @@ class DiversedirectSpider(scrapy.Spider):
         image_urls = self._get_image_urls(response)
         image_dest_names = {}
         for img_url in image_urls:
-            image_dest_names[img_url] = get_image_file_name_from_url(img_url)
+            image_dest_names[img_url] = get_id_and_image_file_name_from_url(img_url)[1]
 
-        # # ======== For now, just retrieve the page's title and save the whole page ========
+        # ======== For now, just retrieve the page's title and save the whole page ========
         title_xpath = response.xpath('//title/text()').get()
-        file_name = f"{file_path_substitution(title_xpath)}.html"
-        if file_name.startswith("DIVERSE DIRECT ｜ "):
-            file_name = file_name[len("DIVERSE DIRECT ｜ "):] # remove "DIVERSE DIRECT | " in the file names
-        file_path = ITEM_HTML_FOLDER_PATH / file_name
+        file_path = ITEM_HTML_FOLDER_PATH / f"{file_path_substitution(title_xpath)}.html"
         file_path.write_bytes(response.body)
 
         self.counter_items+=1
@@ -93,10 +78,20 @@ class DiversedirectSpider(scrapy.Spider):
             f.write(f"item {self.counter_items} {response.url}." + " Images ('url': 'file_name'): " + f"{image_dest_names}" + "\n")
 
         # scrape images too
-        yield {"diversedirect_image_urls": image_urls}
+        yield {"toranoana_image_urls": image_urls}
 
     
     @staticmethod
     def _get_image_urls(response: scrapy.http.TextResponse) -> list[str]: # retrieve all urls of all item images
-        image_urls = response.xpath('//img/@src').getall()
-        return image_urls
+        image_urls = response.xpath('//div[@class="product-detail-image-thumb-item"]/@data-src').getall()
+        cleaned_image_urls = image_urls
+        return cleaned_image_urls
+
+    @staticmethod
+    def _get_next_url(response: scrapy.http.TextResponse, next_page_button: str) -> str:
+        return response.urljoin(next_page_button)
+    
+    @staticmethod
+    def _get_product_url(response: scrapy.http.TextResponse, item_url: str) -> None:
+        return response.urljoin(item_url)
+    

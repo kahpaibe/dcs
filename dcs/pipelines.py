@@ -13,11 +13,12 @@ from scrapy.pipelines.images import ImagesPipeline
 from scrapy.pipelines.media import MediaPipeline
 from typing import Any
 from typing import Callable
-from .spiders import melonbooks_settings as sms
-from .spiders import tanocstore_settings as sts
+from .spiders import melonbooks_settings as smbs
+from .spiders import tanocstore_settings as stcs
 from .spiders import diversedirect_settings as sdds
-from .spiders import bookmate_settings as sbs
-from .spiders import akibaoo_settings as sas
+from .spiders import bookmate_settings as sbms
+from .spiders import akibaoo_settings as sabs
+from .spiders import toranoana_settings as stns
 
 class MelonbooksImagePipeline(ImagesPipeline):
     counter = 0
@@ -33,7 +34,7 @@ class MelonbooksImagePipeline(ImagesPipeline):
         crawler: Crawler | None = None,
     ):
         # Ignore store_uri (=IMAGES_STORE), using custom path instead
-        super().__init__(sms.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
+        super().__init__(smbs.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
             
     def file_path(
         self,
@@ -43,9 +44,9 @@ class MelonbooksImagePipeline(ImagesPipeline):
         *,
         item: Any = None,
     ) -> str:
-        item_id, file_name = sms.get_id_and_image_file_name_from_url(request.url)
+        item_id, file_name = smbs.get_id_and_image_file_name_from_url(request.url)
         self.counter += 1
-        with open(sms.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
+        with open(smbs.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
             f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
 
         return file_name
@@ -65,7 +66,7 @@ class TanocstoreImagePipeline(ImagesPipeline):
         crawler: Crawler | None = None,
     ):
         # Ignore store_uri (=IMAGES_STORE), using custom path instead
-        super().__init__(sts.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
+        super().__init__(stcs.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
             
     def file_path(
         self,
@@ -75,9 +76,9 @@ class TanocstoreImagePipeline(ImagesPipeline):
         *,
         item: Any = None,
     ) -> str:
-        item_id, file_name = sts.get_id_and_image_file_name_from_url(request.url)
+        item_id, file_name = stcs.get_id_and_image_file_name_from_url(request.url)
         self.counter += 1
-        with open(sts.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
+        with open(stcs.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
             f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
 
         return file_name
@@ -128,7 +129,7 @@ class BookmateImagePipeline(ImagesPipeline):
         crawler: Crawler | None = None,
     ):
         # Ignore store_uri (=IMAGES_STORE), using custom path instead
-        super().__init__(sbs.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
+        super().__init__(sbms.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
             
     def file_path(
         self,
@@ -138,9 +139,9 @@ class BookmateImagePipeline(ImagesPipeline):
         *,
         item: Any = None,
     ) -> str:
-        file_name = sbs.get_image_file_name_from_url(request.url)
+        file_name = sbms.get_image_file_name_from_url(request.url)
         self.counter += 1
-        with open(sbs.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
+        with open(sbms.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
             f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
 
         return file_name
@@ -159,7 +160,7 @@ class AkibaooImagePipeline(ImagesPipeline):
         crawler: Crawler | None = None,
     ):
         # Ignore store_uri (=IMAGES_STORE), using custom path instead
-        super().__init__(sas.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
+        super().__init__(sabs.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
             
     def file_path(
         self,
@@ -169,9 +170,41 @@ class AkibaooImagePipeline(ImagesPipeline):
         *,
         item: Any = None,
     ) -> str:
-        file_name = sas.get_id_and_image_file_name_from_url(request.url)[1]
+        file_name = sabs.get_id_and_image_file_name_from_url(request.url)[1]
         self.counter += 1
-        with open(sas.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
+        with open(sabs.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
+            f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
+
+        return file_name
+    
+    
+class ToranoanaImagePipeline(ImagesPipeline):
+    counter = 0
+    DEFAULT_IMAGES_URLS_FIELD = "toranoana_image_urls"
+    DEFAULT_IMAGES_RESULT_FIELD = "toranoana_images"
+
+    def __init__(
+        self,
+        store_uri: Any,
+        download_func: Callable[[Request, Spider], Response] | None = None,
+        settings: Settings | dict[str, Any] | None = None,
+        *,
+        crawler: Crawler | None = None,
+    ):
+        # Ignore store_uri (=IMAGES_STORE), using custom path instead
+        super().__init__(stns.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
+            
+    def file_path(
+        self,
+        request: Request,
+        response: Response | None = None,
+        info: MediaPipeline.SpiderInfo | None = None,
+        *,
+        item: Any = None,
+    ) -> str:
+        file_name = stns.get_id_and_image_file_name_from_url(request.url)[1]
+        self.counter += 1
+        with open(stns.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
             f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
 
         return file_name
