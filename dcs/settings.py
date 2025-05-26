@@ -18,6 +18,12 @@ ADDONS = {}
 
 DOWNLOADER_CLIENT_TLS_CIPHERS = ':HIGH:!DH:!aNULL' #Will solve OpenSSL.SSL.Error: [('SSL routines', '', 'dh key too small')]
 
+# Autothrottle configuration
+AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_START_DELAY = 1
+AUTOTHROTTLE_MAX_DELAY = 5
+DOWNLOAD_DELAY = 2.5
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "dcs (+http://www.yourdomain.com)"
 
