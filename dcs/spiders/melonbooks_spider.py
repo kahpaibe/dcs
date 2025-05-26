@@ -38,7 +38,7 @@ class MelonbookSpider(scrapy.Spider):
 
         Yields new requests for:
             * New search pages (next page) -> self.parse_search_for_products(...)
-            * Corresponding item pages -> self.parse_products(...)"""
+            * Corresponding item pages -> self.parse_product(...)"""
         if not response:
             return
         
@@ -51,17 +51,17 @@ class MelonbookSpider(scrapy.Spider):
         if item_urls:
             for item_url in item_urls:
                 full_item_url = self._get_product_url(response, item_url)
-                yield scrapy.Request(full_item_url, callback=self.parse_products)
+                yield scrapy.Request(full_item_url, callback=self.parse_product)
         
         # === Crawl for more next search page ===
         next_page_button = response.css('a.pagenavi-next::attr(href)').get() # Check if there is a NEXT button
         if next_page_button:
-            next_page_url = self._get_next_url(response.url, next_page_button) # Construct the URL for the next page
+            next_page_url = self._get_next_url(response, next_page_button) # Construct the URL for the next page
             yield scrapy.Request(next_page_url, callback=self.parse_search_for_products) # Follow the URL for the next page
     
     @staticmethod
-    def _get_next_url(current_url: str, next_page_button: str) -> str:
-        cleanedup_url = MelonbookSpider.RE_GET_NEXT_URL_CLEANUP.sub("&text_type=event&", current_url)
+    def _get_next_url(response: scrapy.http.TextResponse, next_page_button: str) -> str:
+        cleanedup_url = MelonbookSpider.RE_GET_NEXT_URL_CLEANUP.sub("&text_type=event&", response.url)
         return cleanedup_url + next_page_button
     
     @staticmethod
@@ -71,7 +71,7 @@ class MelonbookSpider(scrapy.Spider):
             product_url += "&adult_view=1" # bypass R18 check
         return product_url
     
-    def parse_products(self, response: scrapy.http.TextResponse):
+    def parse_product(self, response: scrapy.http.TextResponse):
         """Parse product pages for metatada"""
         if not response:
             return
