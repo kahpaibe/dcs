@@ -30,10 +30,15 @@ class DiversedirectSpider(scrapy.Spider):
     async def start(self):
         global diversedirect_urls # schedule all root urls
         for url in diversedirect_urls:
-            yield scrapy.Request(url=url, callback=self.parse_main) # Well here only 1 page (main page)
+            yield scrapy.Request(url=url, callback=self.parse_main, errback=self.handle_error) # Well here only 1 page (main page)
         
     def parse_main(self, response: scrapy.http.TextResponse):
         """Parse main page for searches to do."""
+        if not response:
+            return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
+
         # Get all artist pages
         options = response.xpath('//select[@id="cat"]/option')
 
@@ -43,7 +48,7 @@ class DiversedirectSpider(scrapy.Spider):
             artist_url = f"https://www.diverse.direct/?cat={cat}"
             if artist_url.endswith("?cat=-1"):
                 artist_url = "https://www.diverse.direct/category/diverse-system" # Manually redirect to ds's categ
-            yield scrapy.Request(artist_url, callback=self.parse_search_for_products)
+            yield scrapy.Request(artist_url, callback=self.parse_search_for_products, errback=self.handle_error)
 
     def parse_search_for_products(self, response: scrapy.http.TextResponse):
         """Parse search pages.
@@ -51,6 +56,11 @@ class DiversedirectSpider(scrapy.Spider):
         Yields new requests for:
             * New search pages (next page) -> self.parse_search_for_products(...)
             * Corresponding item pages -> self.parse_product(...)"""
+        if not response:
+            return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
+
         with open(LOG_SEARCH_PATH, "a+", encoding="utf-8") as f: # Log
             self.counter_search+=1
             f.write(f"search ({self.counter_search}): {response.url}\n")
@@ -61,7 +71,7 @@ class DiversedirectSpider(scrapy.Spider):
         if item_urls:
             for item_url in item_urls:
                 full_item_url = self._get_product_url(response, item_url)
-                yield scrapy.Request(full_item_url, callback=self.parse_product)
+                yield scrapy.Request(full_item_url, callback=self.parse_product, errback=self.handle_error)
         
         # === Crawl for more next search page === -> there is no such page on this website
 
@@ -73,6 +83,8 @@ class DiversedirectSpider(scrapy.Spider):
         """Parse product pages for metatada"""
         if not response:
             return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
         
         # === Retrieve image urls ===
         image_urls = self._get_image_urls(response)
@@ -100,3 +112,7 @@ class DiversedirectSpider(scrapy.Spider):
     def _get_image_urls(response: scrapy.http.TextResponse) -> list[str]: # retrieve all urls of all item images
         image_urls = response.xpath('//img/@src').getall()
         return image_urls
+    
+    def handle_error(self, failure):
+        """Log errors"""
+        self.logger.error(f"Request failed: {failure}")

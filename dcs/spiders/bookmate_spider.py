@@ -31,7 +31,7 @@ class BookmateSpider(scrapy.Spider):
     async def start(self):
         global bookmate_urls # schedule all root urls
         for url in bookmate_urls:
-            yield scrapy.Request(url=url, callback=self.parse_search_for_products) # Well here only 1 page (main page)
+            yield scrapy.Request(url=url, callback=self.parse_search_for_products, errback=self.handle_error) # Well here only 1 page (main page)
 
     def parse_search_for_products(self, response: scrapy.http.TextResponse):
         """Parse search pages.
@@ -39,6 +39,11 @@ class BookmateSpider(scrapy.Spider):
         Yields new requests for:
             * New search pages (next page) -> self.parse_search_for_products(...)
             * Corresponding item pages -> self.parse_product(...)"""
+        if not response:
+            return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
+            
         with open(LOG_SEARCH_PATH, "a+", encoding="utf-8") as f: # Log
             self.counter_search+=1
             f.write(f"search ({self.counter_search}): {response.url}\n")
@@ -49,18 +54,21 @@ class BookmateSpider(scrapy.Spider):
         if item_urls:
             for item_url in item_urls:
                 full_item_url = self._get_product_url(response, item_url)
-                yield scrapy.Request(full_item_url, callback=self.parse_product)
+                yield scrapy.Request(full_item_url, callback=self.parse_product, errback=self.handle_error)
         
         # === Crawl for more next search page === 
         next_page_button = response.xpath('//a[contains(text(), "次のページ")]/@href').get()
         if next_page_button:
             next_page_url = self._get_next_url(response, next_page_button) # Construct the URL for the next page
-            yield scrapy.Request(next_page_url, callback=self.parse_search_for_products) # Follow the URL for the next page
+            yield scrapy.Request(next_page_url, callback=self.parse_search_for_products, errback=self.handle_error) # Follow the URL for the next page
 
     def parse_product(self, response: scrapy.http.TextResponse):
         """Parse product pages for metatada"""
         if not response:
             return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
+
         def parse_product_do(response_: scrapy.http.TextResponse):
             """Defines the parsing action to be called or not (avoid recursion by avoiding yielding a new Request object if not needed)."""
             
@@ -92,7 +100,8 @@ class BookmateSpider(scrapy.Spider):
                 response,
                 formname=None,  # No specific form name needed if there's only one form
                 formdata={'yes': '1'},  # Simulate the "Yes" button press
-                callback=parse_product_do
+                callback=parse_product_do, 
+                errback=self.handle_error
             )
         else:
             yield from parse_product_do(response) # parsing action and pass image url pointer.     
@@ -113,3 +122,7 @@ class BookmateSpider(scrapy.Spider):
         for img_url in image_urls:
             image_urls_joined.append(response.urljoin(img_url))
         return image_urls_joined
+    
+    def handle_error(self, failure):
+        """Log errors"""
+        self.logger.error(f"Request failed: {failure}")

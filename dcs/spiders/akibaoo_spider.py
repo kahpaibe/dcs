@@ -30,7 +30,7 @@ class AkibaooSpider(scrapy.Spider):
     async def start(self):
         global akibaoo_urls # schedule all root urls
         for url in akibaoo_urls:
-            yield scrapy.Request(url=url, callback=self.parse_search_for_products)
+            yield scrapy.Request(url=url, callback=self.parse_search_for_products, errback=self.handle_error)
         
     def parse_search_for_products(self, response: scrapy.http.TextResponse):
         """Parse search pages.
@@ -38,6 +38,11 @@ class AkibaooSpider(scrapy.Spider):
         Yields new requests for:
             * New search pages (next page) -> self.parse_search_for_products(...)
             * Corresponding item pages -> self.parse_product(...)"""
+        if not response:
+            return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
+
         with open(LOG_SEARCH_PATH, "a+", encoding="utf-8") as f: # Log
             self.counter_search+=1
             f.write(f"search ({self.counter_search}): {response.url}\n")
@@ -48,7 +53,7 @@ class AkibaooSpider(scrapy.Spider):
         if item_urls:
             for item_url in item_urls:
                 full_item_url = self._get_product_url(response, item_url)
-                yield scrapy.Request(full_item_url, callback=self.parse_product)
+                yield scrapy.Request(full_item_url, callback=self.parse_product, errback=self.handle_error)
         
         # === Crawl for more next search page === -> No easy next page button...
         
@@ -56,6 +61,8 @@ class AkibaooSpider(scrapy.Spider):
         """Parse product pages for metatada"""
         if not response:
             return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
         
         # === Retrieve image urls ===
         image_urls = self._get_image_urls(response)
@@ -92,3 +99,6 @@ class AkibaooSpider(scrapy.Spider):
     def _get_product_url(response: scrapy.http.TextResponse, item_url: str) -> None:
         return response.urljoin(item_url)
     
+    def handle_error(self, failure):
+        """Log errors"""
+        self.logger.error(f"Request failed: {failure}")

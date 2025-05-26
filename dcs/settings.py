@@ -21,9 +21,12 @@ DOWNLOADER_CLIENT_TLS_CIPHERS = ':HIGH:!DH:!aNULL' #Will solve OpenSSL.SSL.Error
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "dcs (+http://www.yourdomain.com)"
 
-# Obey robots.txt rules
+# Crawling config
 ROBOTSTXT_OBEY = False
 REDIRECT_ENABLED = True
+RETRY_ENABLED = True
+RETRY_TIMES = 5  # Retry a failed request
+DOWNLOAD_TIMEOUT = 15
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html

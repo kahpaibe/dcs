@@ -31,7 +31,7 @@ class MelonbookSpider(scrapy.Spider):
     async def start(self):
         global melonbooks_urls # schedule all root urls
         for url in melonbooks_urls:
-            yield scrapy.Request(url=url, callback=self.parse_search_for_products)
+            yield scrapy.Request(url=url, callback=self.parse_search_for_products, errback=self.handle_error)
 
     def parse_search_for_products(self, response: scrapy.http.TextResponse):
         """Parse search pages.
@@ -41,6 +41,8 @@ class MelonbookSpider(scrapy.Spider):
             * Corresponding item pages -> self.parse_product(...)"""
         if not response:
             return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
         
         with open(LOG_SEARCH_PATH, "a+", encoding="utf-8") as f: # Log
             self.counter_search+=1
@@ -51,13 +53,13 @@ class MelonbookSpider(scrapy.Spider):
         if item_urls:
             for item_url in item_urls:
                 full_item_url = self._get_product_url(response, item_url)
-                yield scrapy.Request(full_item_url, callback=self.parse_product)
+                yield scrapy.Request(full_item_url, callback=self.parse_product, errback=self.handle_error)
         
         # === Crawl for more next search page ===
         next_page_button = response.css('a.pagenavi-next::attr(href)').get() # Check if there is a NEXT button
         if next_page_button:
             next_page_url = self._get_next_url(response, next_page_button) # Construct the URL for the next page
-            yield scrapy.Request(next_page_url, callback=self.parse_search_for_products) # Follow the URL for the next page
+            yield scrapy.Request(next_page_url, callback=self.parse_search_for_products, errback=self.handle_error) # Follow the URL for the next page
     
     @staticmethod
     def _get_next_url(response: scrapy.http.TextResponse, next_page_button: str) -> str:
@@ -75,6 +77,8 @@ class MelonbookSpider(scrapy.Spider):
         """Parse product pages for metatada"""
         if not response:
             return
+        if response.status != 200:
+            self.handle_error(f"Error: {response.status}...")
         
         image_urls = self._get_image_urls(response)
         image_dest_names = {}
@@ -118,6 +122,9 @@ class MelonbookSpider(scrapy.Spider):
             cleaned_image_urls.append(image_url)
         return cleaned_image_urls
 
+    def handle_error(self, failure):
+        """Log errors"""
+        self.logger.error(f"Request failed: {failure}")
     # @staticmethod
     # def _strip_list(str_list: list[str], chars: str = "\r\n\t 　") -> list[str]: # Strip each list element
     #     return [a.strip(chars) for a in str_list]
