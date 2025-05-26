@@ -33,8 +33,8 @@ def configure_loggers(): # Called when starting the spider, configure the logger
 # root url list definition
 #   Here, define the first pages to parse, from which new pages can be accessed. For example, a search pages for all M3-XX events.
 # ===================================================================
-toranoana_urls: list[str] = [] # /!\ Should be updated if there are more pages !
-toranoana_urls.append("https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=%E9%9F%B3%E6%A5%BDCD&searchBackorderFlg=0&searchUsedItemFlg=1&searchDisplay=0&detailSearch=true&commodity_kind_name=%E5%90%8C%E4%BA%BA%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0") # Music && Doujin item
+toranoana_urls: list[str] = []
+toranoana_urls.append("https://ecs.toranoana.jp/tora/ec/app/catalog/list/?searchWord=%E9%9F%B3%E6%A5%BD&searchBackorderFlg=0&searchUsedItemFlg=1&searchDisplay=0&detailSearch=true&commodity_kind_name=%E5%90%8C%E4%BA%BA%E3%82%A2%E3%82%A4%E3%83%86%E3%83%A0") # Doujin item && Music CD
 
 # ======================================================================
 # Utilities
