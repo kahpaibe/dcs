@@ -19,7 +19,7 @@ class MelonbookSpider(scrapy.Spider):
     counter_items = 0
     counter_search = 0
 
-    RE_GET_NEXT_URL_CLEANUP = re.compile(r'&text_type=event.*$', re.IGNORECASE)
+    RE_GET_NEXT_URL_CURRENT_PAGE = re.compile(r'\&pageno=(\d*)', re.IGNORECASE)
     RE_CLEAN_IMAGE_URL_1 = re.compile(r'\.jpg.*$', re.IGNORECASE)
     RE_CLEAN_IMAGE_URL_2 = re.compile(r'melonbooks.akamaized.net/user_data/', re.IGNORECASE)
 
@@ -63,8 +63,12 @@ class MelonbookSpider(scrapy.Spider):
     
     @staticmethod
     def _get_next_url(response: scrapy.http.TextResponse, next_page_button: str) -> str:
-        cleanedup_url = MelonbookSpider.RE_GET_NEXT_URL_CLEANUP.sub("&text_type=event&", response.url)
-        return cleanedup_url + next_page_button
+        match1 = MelonbookSpider.RE_GET_NEXT_URL_CURRENT_PAGE.search(response.url)
+        current_page_num: str
+        if match1:
+            current_page_num = int(match1.group(1))
+            cleanedup_url = response.url.replace(f"pageno={current_page_num}", f"pageno={current_page_num + 1}")
+            return cleanedup_url
     
     @staticmethod
     def _get_product_url(response: scrapy.http.TextResponse, item_url: str) -> None:
