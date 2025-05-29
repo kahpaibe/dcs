@@ -19,6 +19,7 @@ from .spiders import diversedirect_settings as sdds
 from .spiders import bookmate_settings as sbms
 from .spiders import akibaoo_settings as sabs
 from .spiders import toranoana_settings as stns
+from .spiders import surugaya_settings as ssys
 
 class MelonbooksImagePipeline(ImagesPipeline):
     counter = 0
@@ -207,4 +208,44 @@ class ToranoanaImagePipeline(ImagesPipeline):
         with open(stns.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
             f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
 
+        return file_name
+    
+class SurugayaImagePipeline(ImagesPipeline):
+    counter = 0
+    DEFAULT_IMAGES_URLS_FIELD = "surugaya_image_urls"
+    DEFAULT_IMAGES_RESULT_FIELD = "surugaya_images"
+
+    def __init__(
+        self,
+        store_uri: Any,
+        download_func: Callable[[Request, Spider], Response] | None = None,
+        settings: Settings | dict[str, Any] | None = None,
+        *,
+        crawler: Crawler | None = None,
+    ):
+        # Ignore store_uri (=IMAGES_STORE), using custom path instead
+        super().__init__(ssys.ITEM_IMAGE_FOLDER_PATH, download_func, settings, crawler=crawler)
+            
+    def image_downloaded(
+        self,
+        response: Response,
+        request: Request,
+        info: MediaPipeline.SpiderInfo,
+        *,
+        item: Any = None,
+    ) -> str:
+        file_name = ssys.get_id_and_image_file_name_from_url(request.url)[1]
+        self.counter += 1
+        with open(ssys.LOG_IMAGES_PATH, "+a", encoding="utf-8") as f:
+            f.write(f"image {self.counter}: {request.url} (saved as {file_name})\n")
+        
+    def file_path(
+        self,
+        request: Request,
+        response: Response | None = None,
+        info: MediaPipeline.SpiderInfo | None = None,
+        *,
+        item: Any = None,
+    ) -> str:
+        file_name = ssys.get_id_and_image_file_name_from_url(request.url)[1]
         return file_name

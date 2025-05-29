@@ -43,6 +43,7 @@ ITEM_PIPELINES = {
     "dcs.pipelines.BookmateImagePipeline": 1,
     "dcs.pipelines.AkibaooImagePipeline": 1,
     "dcs.pipelines.ToranoanaImagePipeline": 1,
+    "dcs.pipelines.SurugayaImagePipeline": 1,
                   }
 # IMAGES_STORE =  # Will be overriden anyway
 
