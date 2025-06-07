@@ -27,6 +27,20 @@ Many configs relevant to the program are available in the `./spiders/{spider_nam
 | bookmate | Scrape [Bookmate](https://bookmate-net.com/) | html dump | Extract item info to a db |
 | akibaoo | Scrape [Akibaoo](https://www.akibaoo.com/) | html dump | Extract item info to a db, "Auto next page" |
 | toranoana | Scrape [Toranoana](https://ecs.toranoana.jp/) | html dump | Extract item info to a db, more suited root url |
+| surugaya | Scrape [Surugaya](https://www.suruga-ya.jp/) | html dump | |
+
+## Post processing
+
+Added at a later development stage, the following scripts allow parsing the already downloaded content, saving data to a [sqlite3](docs.python.org/3/library/sqlite3.html) database. 
+
+To use them, run the respective scripts found in `post_process/{name}.py with python.
+
+
+| Name | Description | Todo |
+| ---- | ----------- | ------ | ---- |
+| `surugaya_post_process.py` | For Surugaya | Save images in DB too |
+
+
 
 ## Notes
 
