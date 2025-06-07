@@ -9,11 +9,14 @@ from db_wrapper import DBWrapper, DBColumnDescription
 from dataclasses import dataclass
 from spiders.surugaya_settings import LOG_IMAGES_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_id_and_image_file_name_from_url, RESOURCES_FOLDER_PATH
 
+# === User parameters ===
+LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"
+LOG_POSTPROCESSING_PATH.parent.mkdir(parents=True, exist_ok=True) # Create log file
+DO_DB_DUMP_TO_JSON = False # If true, dumps the whole db file to a json file. Preferably disabled for large db files.
+
 # === Database description ===
 DB_PATH = LOG_IMAGES_PATH.parent / "surugaya_db.db"
 DB_TABLE_NAME = "surugaya_db"
-LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"
-LOG_POSTPROCESSING_PATH.parent.mkdir(parents=True, exist_ok=True) # Create log file
 
 @dataclass
 class SurugayaColumnDescription(DBColumnDescription):
@@ -209,5 +212,5 @@ if __name__ == "__main__":
             with open(LOG_POSTPROCESSING_PATH, "a+", encoding="utf-8") as f:
                 f.write(f'{txt}\n')
 
-    if True: #Dump db to json
+    if DO_DB_DUMP_TO_JSON: #Dump db to json
         db.json_dumps(DB_PATH.with_suffix(".json"))

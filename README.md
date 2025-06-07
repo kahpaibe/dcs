@@ -7,6 +7,7 @@ Crappy scrapy crawler to scrape some websites.
 
 * [python 3.10+](https://www.python.org/)
 * [scrapy](https://www.scrapy.org/) for given python version (`pip install scrapy`)
+* [sqlite3](docs.python.org/3/library/sqlite3.html) for given python version
 
 **Usage**
 
