@@ -41,7 +41,7 @@ To use them, run the respective scripts found in `post_process/{name}.py with py
 | ---- | ----------- | ------ |
 | `surugaya_post_process.py` | For Surugaya | Save images in DB too |
 | `melonbooks_post_process.py` | For Melonbooks | Save images in DB too, manage samples like [here](https://www.melonbooks.co.jp/detail/detail.php?product_id=2492871) |
-| `bookmate_post_process.py | For Bookmate | Extract events from 関連キーワード |
+| `bookmate_post_process.py` | For Bookmate | Extract events from 関連キーワード |
 
 
 
