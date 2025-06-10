@@ -19,8 +19,6 @@ from db_wrapper import DBWrapper, DBColumnDescription
 from dataclasses import dataclass
 from spiders.bookmate_settings import RESOURCES_FOLDER_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_image_file_name_from_url
 import json
-# from spiders.melonbooks_settings import RESOURCES_FOLDER_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_id_and_image_file_name_from_url
-# from spiders.melonbooks_spider import MelonbookSpider
 
 # # === User parameters ===
 LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"
@@ -53,7 +51,7 @@ class BookmateColumnDescription(DBColumnDescription):
         return "item_id"
 
 class BookmateSoupParser:
-    """Wraps parsing of Melonboooks product page soup."""
+    """Wraps parsing of Bookmate product page soup."""
 
     def __init__(self, soup: BeautifulSoup):
         self.soup = soup
@@ -136,9 +134,8 @@ class BookmateSoupParser:
                 
             except Exception:
                     expected_paths.append("ERROR")
-
-
-        return (", ".join(image_urls), ", ".join(expected_paths))
+                    
+        return (", ".join(cleaned_image_urls), ", ".join(expected_paths))
 
 
 if __name__ == "__main__":
