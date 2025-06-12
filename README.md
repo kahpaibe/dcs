@@ -45,6 +45,7 @@ To use them, run the respective scripts found in `post_process/{name}.py with py
 | `akibaoo_post_process.py` | For Akibaoo | Handle images in description like [here](https://www.akibaoo.com/c/80/2500020540633/), further process json blocks |
 | `diversedirect_post_process.py` | For DIVERSE DIRECT | Handle XFD like [here](https://www.diverse.direct/diverse-system/dvsp-0212/) |
 | `tanocstore_post_process.py` | For TANO*C STORE | Handle XFD like [here](https://www.tanocstore.net/shopdetail/000000000582/) |
+| `toranoana_post_process`| For Toranoana | Handle samples like [here](https://ecs.toranoana.jp/tora/ec/item/040031237392/) | 
 
 
 ## Notes
