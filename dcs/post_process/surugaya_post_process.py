@@ -62,7 +62,7 @@ class SurugayaSoupParser:
 
     def __init__(self, soup: BeautifulSoup):
         self.soup = soup
-        self.soup_raw = soup.prettify(encoding="utf-8")
+        # self.soup_raw = soup.prettify(encoding="utf-8")
 
         # == Info in <script> ==
         item_dict = self._get_item_script_dict()
@@ -86,7 +86,7 @@ class SurugayaSoupParser:
         self.image_file_path = self._get_image_file_path()        
     
     def _get_item_script_dict(self) -> dict[str, str | None]: # Retrieve info from <script> item var
-        script_tag = soup.find('script', string=lambda text: text and 'var item' in text)
+        script_tag = self.soup.find('script', string=lambda text: text and 'var item' in text)
 
         # Extract the JavaScript object from the script tag
         script_content = script_tag.string
@@ -115,7 +115,7 @@ class SurugayaSoupParser:
         return item_dict
 
     def _get_script_application_dict(self) -> dict[str, str | None]: # Retrieve info from <script type="application/ld+json">
-        script_application_tag = soup.find('script', string=lambda text: text and 'releaseDate' in text)
+        script_application_tag = self.soup.find('script', string=lambda text: text and 'releaseDate' in text)
         if not script_application_tag:
             return {}
 

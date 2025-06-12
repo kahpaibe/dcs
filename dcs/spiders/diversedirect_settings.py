@@ -48,7 +48,7 @@ def get_image_raw_name_from_url(url: str) -> str:
     else:
         logging.warning(f"Warning! Could not find image name in {url} !")
 
-def get_image_file_name_from_url(url: str) -> tuple[str, str]:
+def get_image_file_name_from_url(url: str) -> str:
     """Compute image name from url and return file_name"""
     raw_name, ext = get_image_raw_name_from_url(url)
     return file_path_substitution(f"{raw_name}_{hashlib.sha1(to_bytes(url)).hexdigest()}.{ext}")

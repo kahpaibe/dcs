@@ -1,8 +1,8 @@
 """
-Post processing for Akibaoo.
+Post processing for TANO*C STORE.
 
 **Usage**
-Just run this script with python. e.g. `python akibaoo_post_process.py`
+Just run this script with python. e.g. `python tanocstore_post_process.py`
 
 **Notes**
 """
@@ -17,8 +17,7 @@ from typing import  override, Optional, Literal
 from bs4 import BeautifulSoup
 from db_wrapper import DBWrapper, DBColumnDescription
 from dataclasses import dataclass
-from spiders.akibaoo_settings import RESOURCES_FOLDER_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_id_and_image_file_name_from_url
-import json
+from spiders.tanocstore_settings import RESOURCES_FOLDER_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_id_and_image_file_name_from_url
 
 # # === User parameters ===
 LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"
@@ -26,17 +25,18 @@ LOG_POSTPROCESSING_PATH.parent.mkdir(parents=True, exist_ok=True) # Create folde
 DO_DB_DUMP_TO_JSON = False # If true, dumps the whole db file to a json file. Preferably disabled for large db files.
 
 # === Database description ===
-DB_PATH = RESOURCES_FOLDER_PATH / "akibaoo_db.db"
-DB_TABLE_NAME = "akibaoo_db"
+DB_PATH = RESOURCES_FOLDER_PATH / "tanocstore_db.db"
+DB_TABLE_NAME = "tanocstore_db"
 
 @dataclass
-class AkibaooColumnDescription(DBColumnDescription):
+class TanocstoreColumnDescription(DBColumnDescription):
     """Describes database columns."""
     item_id: str
     name: Optional[str] = None
-    area_details: Optional[str] = None
-    info_details: Optional[str] = None
 
+    description: Optional[str] = None
+    artist_catalog: Optional[str] = None
+    
     url: Optional[str] = None
     image_urls: Optional[str] = None # Format is ", ".join(url_list)
     image_file_paths: Optional[str | Literal["ERROR"]] = None # Will be "ERROR" if there is an image url but image file could not be found. Format is ", ".join(path_list)
@@ -45,76 +45,71 @@ class AkibaooColumnDescription(DBColumnDescription):
     def get_primary_key(self) -> str:
         return "item_id"
 
-class AkibaooSoupParser:
-    """Wraps parsing of Akibaoo product page soup."""
+class TanocstoredirectSoupParser:
+    """Wraps parsing of TANO*C STORE product page soup."""
 
     def __init__(self, soup: BeautifulSoup):
         self.soup = soup
         # self.soup_raw = soup.prettify(encoding="utf-8")
 
-        self.url, self.item_id = self._get_item_url_and_id()
+        self.item_id, self.url = self._get_item_id_and_url()
         self.name = self._get_name()
-        self.area_details = self._get_area_details()
-        self.info_details = self._get_info_details()
 
+        self.description = self._get_description()
+        
+        details_dict = self._get_details()
+        self.artist_catalog = details_dict.get("artist_catalog", None)
+        
         self.image_urls, self.image_file_paths = self._get_image_urls_and_paths()
 
-    def _get_item_url_and_id(self) -> tuple[str | None, str | None] : # Retrieve url and item id
-        link = self.soup.select_one('link[rel="canonical"]')
-        if not link or 'href' not in link.attrs:
-            return None, None
-        url = f"www.akibaoo.com{link['href']}"
-        m = re.search(r"\/([^\/]+)\/?$", str(link['href']), re.IGNORECASE)
+    def _get_item_id_and_url(self) -> tuple[str | None, str | None]:
+        meta_tag = self.soup.select_one('meta[property="og:url"]')
+        if not meta_tag:
+            return (None, None)
+
+        url = str(meta_tag["content"])
+        m = re.search(r"/([^/]+)/$", url)
         if not m:
-            return url, None
-        return url, m.group(1)
-    
+            return (None, None)
+        return m.group(1), url
+
     def _get_name(self) -> str | None: # Retrieve name
-        title = self.soup.select_one('title')
-        if not title:
+        meta_tag = self.soup.select_one('meta[property="og:title"]')
+        if not meta_tag:
             return None
-        
-        return title.text.replace(" | あきばお～こく", "").strip(" \n")
+        return str(meta_tag["content"]).replace("-TANO*C STORE", "")
 
-    def _get_area_details(self) -> str | None: # Retrieve content of <div class="area_Detail">
-        tag = self.soup.select_one('div.area_Detail')
-        if not tag:
+    def _get_description(self) -> str | None: # Retrieve description
+        meta_tag = self.soup.select_one('meta[property="og:description"]')
+        if not meta_tag:
             return None
+
+        return str(meta_tag["content"]).strip(" \n\t")
+
+    def _get_details(self) -> dict[str, str]: # From <div class="detailr">
+        div_tag = self.soup.select_one("div.detailr")
+        if not div_tag:
+            return {}
         
-        detail_dict_lists: dict[str, list[str]] = {}
-        for element in tag.find_all(True):
-            if element.has_attr('class'):
-                class_name = ' '.join(element['class'])
-                text_content = element.get_text(strip=True)
-                if text_content:
-                    if class_name not in detail_dict_lists:
-                        detail_dict_lists[class_name] = [text_content]
-                    else:
-                        detail_dict_lists[class_name].append(text_content)
-        detail_dict: dict[str,str] = {}
-        for cn in detail_dict_lists:
-            detail_dict[cn] = "\n".join(detail_dict_lists[cn])
-        return json.dumps(detail_dict, ensure_ascii=False, indent=None)
-
-    def _get_info_details(self) -> str | None: # Retrieve <p class="detail_info"> info
-        goods_detail_div = soup.select_one('div#goodsDetail_info.goodsDetail_info.cf')
-
-        if goods_detail_div:
-            return str(goods_detail_div)
-        return None
-
+        out_dict: dict[str, str] = {}
+        h2_tag = div_tag.select_one("h2")
+        if h2_tag:
+            out_dict["name"] = h2_tag.get_text(strip=True)
+        span_tag = div_tag.select_one("span")
+        if span_tag:
+            out_dict["artist_catalog"] = span_tag.get_text(strip=True)
+        return out_dict
+        
     def _get_image_urls_and_paths(self) -> tuple[str | None, str | None]: # Retrieve image urls and expected paths. Format is (", ".join(image_urls), ", ".join(image_paths))
-        img_tags = self.soup.select('img.goodsDtlImgThumb')
+        img_tags = self.soup.select('div.img img')
         if not img_tags:
             return None, None
-        image_urls = [img["src"] for img in img_tags]
+        image_urls = [str(img["src"]) for img in img_tags]
         if not image_urls:
             return None, None
         
-        cleaned_image_urls = [f"https://www.akibaoo.com{url}" for url in image_urls]
-        
         expected_paths: list[str] = []
-        for image_url in cleaned_image_urls:
+        for image_url in image_urls:
             try:
                 expected_path = Path(get_id_and_image_file_name_from_url(image_url)[1])
                 expected_path = ITEM_IMAGE_FOLDER_PATH / expected_path
@@ -126,19 +121,19 @@ class AkibaooSoupParser:
             except Exception:
                     expected_paths.append("ERROR")
                     
-        return (", ".join(cleaned_image_urls), ", ".join(expected_paths))
+        return (", ".join(image_urls), ", ".join(expected_paths))    
 
 if __name__ == "__main__":
-    txt = "===================================================\n Starting Akibaoo post processing...\n==================================================="
+    txt = "===================================================\n Starting TANO*C STORE post processing...\n==================================================="
     print(txt)
     with open(LOG_POSTPROCESSING_PATH, "a+", encoding="utf-8") as f:
         f.write(f'{txt}\n')
 
     # === Set up database columns ===
-    DB_COLUMN_DESCRIPTION = AkibaooColumnDescription(item_id="TEXT PRIMARY KEY")
+    DB_COLUMN_DESCRIPTION = TanocstoreColumnDescription(item_id="TEXT PRIMARY KEY")
     DB_COLUMN_DESCRIPTION.name = "TEXT"
-    DB_COLUMN_DESCRIPTION.area_details = "TEXT"
-    DB_COLUMN_DESCRIPTION.info_details = "TEXT"
+    DB_COLUMN_DESCRIPTION.description = "TEXT"
+    DB_COLUMN_DESCRIPTION.artist_catalog = "TEXT"
     DB_COLUMN_DESCRIPTION.url = "TEXT"
     DB_COLUMN_DESCRIPTION.image_urls = "TEXT"
     DB_COLUMN_DESCRIPTION.image_file_paths = "TEXT"
@@ -151,23 +146,22 @@ if __name__ == "__main__":
         try:
             soup: BeautifulSoup
             # Open file
-            with open(html_file_path, "r", encoding="utf-8") as f:
+            with open(html_file_path, "r", encoding="euc_jp") as f:
                 soup = BeautifulSoup(f, features="html.parser")
         
-            parsed = AkibaooSoupParser(soup)
-            new_item = AkibaooColumnDescription(
+            parsed = TanocstoredirectSoupParser(soup)
+            new_item = TanocstoreColumnDescription(
                 item_id=parsed.item_id,
-                url=parsed.url,
                 name=parsed.name,
-                area_details=parsed.area_details,
-                info_details=parsed.info_details,
+                description=parsed.description,
+                artist_catalog=parsed.artist_catalog,
+                url=parsed.url,
                 image_urls=parsed.image_urls,
                 image_file_paths=parsed.image_file_paths,
             )
             new_item.strip_str_fields() # clean up
 
             db.save_item(new_item)
-
                     
             txt = f"Processed {html_file_path}"
             print(txt)

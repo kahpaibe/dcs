@@ -39,11 +39,12 @@ To use them, run the respective scripts found in `post_process/{name}.py with py
 
 | Name | Description | Todo |
 | ---- | ----------- | ------ |
-| `surugaya_post_process.py` | For Surugaya | Save images in DB too |
-| `melonbooks_post_process.py` | For Melonbooks | Save images in DB too, manage samples like [here](https://www.melonbooks.co.jp/detail/detail.php?product_id=2492871) |
+| `surugaya_post_process.py` | For Surugaya | |
+| `melonbooks_post_process.py` | For Melonbooks | Handle samples like [here](https://www.melonbooks.co.jp/detail/detail.php?product_id=2492871) |
 | `bookmate_post_process.py` | For Bookmate | Extract events from 関連キーワード |
-| `akibaoo_post_process.py` | For Akibaoo | Manage images in description like [here](https://www.akibaoo.com/c/80/2500020540633/), further process json blocks |
-
+| `akibaoo_post_process.py` | For Akibaoo | Handle images in description like [here](https://www.akibaoo.com/c/80/2500020540633/), further process json blocks |
+| `diversedirect_post_process.py` | For DIVERSE DIRECT | Handle XFD like [here](https://www.diverse.direct/diverse-system/dvsp-0212/) |
+| `tanocstore_post_process.py` | For TANO*C STORE | Handle XFD like [here](https://www.tanocstore.net/shopdetail/000000000582/) |
 
 
 ## Notes

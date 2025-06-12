@@ -23,7 +23,7 @@ from spiders.melonbooks_spider import MelonbookSpider
 # # === User parameters ===
 LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"
 LOG_POSTPROCESSING_PATH.parent.mkdir(parents=True, exist_ok=True) # Create folder where log file is
-DO_DB_DUMP_TO_JSON = True # If true, dumps the whole db file to a json file. Preferably disabled for large db files.
+DO_DB_DUMP_TO_JSON = False # If true, dumps the whole db file to a json file. Preferably disabled for large db files.
 
 # === Database description ===
 DB_PATH = RESOURCES_FOLDER_PATH / "melonbooks_db.db"
@@ -63,7 +63,7 @@ class MelonbooksSoupParser:
 
     def __init__(self, soup: BeautifulSoup):
         self.soup = soup
-        self.soup_raw = soup.prettify(encoding="utf-8")
+        # self.soup_raw = soup.prettify(encoding="utf-8")
 
         self.name = self._get_name()
         self.author_name = self._get_author_name()
@@ -139,7 +139,7 @@ class MelonbooksSoupParser:
     def _get_image_urls_and_paths(self) -> tuple[str | None, str | Literal["ERROR"] | None]: # Retrieve image urls and file paths. Format is ( ", ".join(url_list), ", ".join(path_list) )
         figure_tags = self.soup.select('div.slider.my-gallery figure a')
 
-        image_urls: list[str] = [a['href'] for a in figure_tags if 'href' in a.attrs]
+        image_urls: list[str] = [str(a['href']) for a in figure_tags if 'href' in a.attrs]
         if not image_urls:
             return (None, None)
 
@@ -191,7 +191,7 @@ class MelonbooksSoupParser:
         if not table:
             return {}
         
-        table_data: dict[str] = {}
+        table_data: dict[str, str] = {}
 
         for row in table.find_all('tr'):
             th = row.find('th')

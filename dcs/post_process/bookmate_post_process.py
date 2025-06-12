@@ -23,7 +23,7 @@ import json
 # # === User parameters ===
 LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"
 LOG_POSTPROCESSING_PATH.parent.mkdir(parents=True, exist_ok=True) # Create folder where log file is
-DO_DB_DUMP_TO_JSON = True # If true, dumps the whole db file to a json file. Preferably disabled for large db files.
+DO_DB_DUMP_TO_JSON = False # If true, dumps the whole db file to a json file. Preferably disabled for large db files.
 
 # === Database description ===
 DB_PATH = RESOURCES_FOLDER_PATH / "bookmate_db.db"
@@ -55,7 +55,7 @@ class BookmateSoupParser:
 
     def __init__(self, soup: BeautifulSoup):
         self.soup = soup
-        self.soup_raw = soup.prettify(encoding="utf-8")
+        # self.soup_raw = soup.prettify(encoding="utf-8")
 
         self.item_id = self._get_item_id()
         self.url = f"https://bookmate-net.com/ec/{self.item_id}" if self.item_id else None
@@ -77,7 +77,7 @@ class BookmateSoupParser:
         form = self.soup.select_one('div.item-detail div.push-cart form.form-horizontal')
         if not form or 'action' not in form.attrs:
             return None
-        m = re.search(r"push\/([^\/]+)", form['action'], re.IGNORECASE)
+        m = re.search(r"push\/([^\/]+)", str(form['action']), re.IGNORECASE)
         if not m:
             return None
         return m.group(1)
@@ -147,6 +147,16 @@ if __name__ == "__main__":
 
     # === Set up database columns ===
     DB_COLUMN_DESCRIPTION = BookmateColumnDescription(item_id="TEXT PRIMARY KEY")
+    DB_COLUMN_DESCRIPTION.name = "TEXT"
+    DB_COLUMN_DESCRIPTION.circle_name = "TEXT"
+    DB_COLUMN_DESCRIPTION.artists = "TEXT"
+    DB_COLUMN_DESCRIPTION.release_date = "TEXT"
+    DB_COLUMN_DESCRIPTION.genre = "TEXT"
+    DB_COLUMN_DESCRIPTION.keywords = "TEXT"
+    DB_COLUMN_DESCRIPTION.url = "TEXT"
+    DB_COLUMN_DESCRIPTION.image_urls = "TEXT"
+    DB_COLUMN_DESCRIPTION.image_file_paths = "TEXT"
+    DB_COLUMN_DESCRIPTION.descriptions = "TEXT"
 
     # === Database Init ===
     db = DBWrapper(str(DB_PATH), DB_TABLE_NAME, DB_COLUMN_DESCRIPTION)
