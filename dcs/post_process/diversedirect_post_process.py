@@ -13,12 +13,17 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent)) # Allow relative import
 
 import re
-from typing import  override, Optional, Literal
+from typing import Optional, Literal
 from bs4 import BeautifulSoup
 from db_wrapper import DBWrapper, DBColumnDescription
 from dataclasses import dataclass
 from spiders.diversedirect_settings import RESOURCES_FOLDER_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_image_file_name_from_url
 import json
+try:
+    from typing import override
+except ImportError:
+    def override(func): # dummy decorator for compatibility with Python < 3.12
+        return func
 
 # # === User parameters ===
 LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"

@@ -6,20 +6,24 @@ Just run this script with python. e.g. `python melonbooks_post_process.py`
 
 **Notes**
 """
-
-
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent)) # Allow relative import
 
 import re
-from typing import  override, Optional, Literal
+from typing import Optional, Literal
 from bs4 import BeautifulSoup
 from db_wrapper import DBWrapper, DBColumnDescription
 from dataclasses import dataclass
 from spiders.melonbooks_settings import RESOURCES_FOLDER_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_id_and_image_file_name_from_url
 from spiders.melonbooks_spider import MelonbookSpider
 
+try:
+    from typing import override
+except ImportError:
+    def override(func): # dummy decorator for compatibility with Python < 3.12
+        return func
+    
 # # === User parameters ===
 LOG_POSTPROCESSING_PATH = RESOURCES_FOLDER_PATH / "post_processing.log"
 LOG_POSTPROCESSING_PATH.parent.mkdir(parents=True, exist_ok=True) # Create folder where log file is

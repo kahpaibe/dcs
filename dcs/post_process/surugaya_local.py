@@ -7,12 +7,17 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent)) # Allow relative import
 
 import re
-from typing import  override, Optional, Literal
+from typing import Optional, Literal
 from bs4 import BeautifulSoup
 from db_wrapper import DBWrapper, DBColumnDescription
 from dataclasses import dataclass
 from spiders.surugaya_settings import LOG_IMAGES_PATH, ITEM_HTML_FOLDER_PATH, ITEM_IMAGE_FOLDER_PATH, get_id_and_image_file_name_from_url, RESOURCES_FOLDER_PATH
-
+try:
+    from typing import override
+except ImportError:
+    def override(func): # dummy decorator for compatibility with Python < 3.12
+        return func
+    
 PATH_LOCAL_CSS = Path(__file__).parent / "assets" / "surugaya"
 
 def get_image_url(soup) -> str | None: # Retrieve info from <script type="application/ld+json">
