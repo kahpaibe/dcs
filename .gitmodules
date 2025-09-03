@@ -1,0 +1,3 @@
+[submodule "lib/kahscrape"]
+	path = lib/kahscrape
+	url = https://github.com/kahpaibe/kahscrape.git
